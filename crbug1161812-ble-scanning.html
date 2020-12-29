@@ -15,6 +15,31 @@
 
 Repro case for <a href="https://crbug.com/1161812">crbug.com/1161812</a><br />
 
+<p>
+Steps to reproduce the problem:<br />
+0. Make sure you have "Experimental Web Platform features" enabled in chrome://flags<br />
+1. Click "Scan".<br />
+2. A "Scan permission" prompt pops up.<br />
+3. Allow the scan.<br />
+4. Observe the advertisement data from surrounding devices being picked up and printed in the textarea on the page.<br />
+5. Observe the scan is stopped after 5 seconds.<br />
+6. DO NOT reload the page and click "Scan" again.<br />
+7. Observe no permissions dialog pop-up (which is expected).<br />
+8. Observe that NO advertisements come through this time (unexpected).<br />
+9. Observe the "Scan stopped." message not being printed to the textarea in 5 seconds.<br />
+10. Suspected: the `await navigator.bluetooth.requestLEScan(options)` never resolves with a BluetoothLEScan instance and the async code hangs indefinitely.<br />
+</p>
+
+<p>
+What is the expected behavior?<br />
+A second scan is initiated and advertisements entries are logged.<br />
+</p>
+
+<p>
+What went wrong?<br />
+The `requestLEScan()` return value promise doesn't seem to resolve on subsequent method invokations.<br />
+</p>
+
 <button onclick="onButtonClick()">Scan</button>
 <textarea id="log" rows="20"></textarea>
 
