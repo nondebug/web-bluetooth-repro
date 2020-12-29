@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+	textarea {
+		width: 95%;
+		margin: 1rem auto;
+	}
+
+	button {
+		font-size: 24px;
+		padding: 2rem;
+	}
+</style>
+
+Repro case for <a href="https://crbug.com/1161812">crbug.com/1161812</a><br />
+
+<button onclick="onButtonClick()">Scan</button>
+<textarea id="log" rows="20"></textarea>
+
+<script>
+	const t = document.querySelector('textarea')
+	let scan = null
+
+	async function onButtonClick() {
+		let options = {}
+		options.acceptAllAdvertisements = true
+		options.keepRepeatedDevices = true
+
+		try {
+			log( 'Scan started' )
+			if ( ! scan ) {
+				navigator.bluetooth.addEventListener('advertisementreceived', event => {
+					log('Advertisement received.');
+					log('  Device Name: ' + event.device.name);
+					log('  Device ID: ' + event.device.id);
+				});
+			}			
+			scan = await navigator.bluetooth.requestLEScan(options)
+			setTimeout( () => { log('Scan stopped.'); scan.stop() }, 5000 )			
+		} catch(error)  {
+			log('Argh! ' + error);
+		}
+	}
+
+	function log( text ) {
+		t.value = t.value + "\n" + text
+	}
+</script>
